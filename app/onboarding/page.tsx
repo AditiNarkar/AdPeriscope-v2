@@ -12,7 +12,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { useAppStore } from "@/store/use-app-store";
 
 const steps = ["Brand", "Competitors", "Audience"];
-const agents = ["seo", "audience", "persona"] as const;
+const agents = ["seo", "competitor", "audience", "persona"] as const;
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -20,8 +20,7 @@ export default function OnboardingPage() {
     activeWorkspaceId,
     workspaces,
     updateWorkspace,
-    setWorkerRuns,
-    updateWorkerRun
+    setWorkerRuns
   } = useAppStore();
   const [step, setStep] = useState(0);
   const [offer, setOffer] = useState("");
@@ -70,38 +69,23 @@ export default function OnboardingPage() {
         body: JSON.stringify({ prompt })
       });
 
-      await Promise.all(
-        agents.map(async (agent) => {
-          updateWorkerRun(workspace.id, {
-            agent,
-            status: "running",
-            updatedAt: new Date().toISOString()
-          });
+      const response = await apiPost<
+        {
+          runs: {
+            id?: string;
+            agent: (typeof agents)[number];
+            status: "queued" | "running" | "completed" | "failed";
+            output?: string;
+            updatedAt: string;
+          }[];
+        },
+        { query: string; agents: (typeof agents)[number][] }
+      >(`/api/workspaces/${workspace.id}/agent-runs`, {
+        query: prompt,
+        agents: [...agents]
+      });
 
-          try {
-            const response = await apiPost<
-              { output: string },
-              { agent: typeof agent; query: string }
-            >("/api/agents/run", {
-              agent,
-              query: prompt
-            });
-
-            updateWorkerRun(workspace.id, {
-              agent,
-              status: "completed",
-              output: response.output,
-              updatedAt: new Date().toISOString()
-            });
-          } catch {
-            updateWorkerRun(workspace.id, {
-              agent,
-              status: "failed",
-              updatedAt: new Date().toISOString()
-            });
-          }
-        })
-      );
+      setWorkerRuns(workspace.id, response.runs);
 
       router.push("/dashboard");
     } catch {
@@ -147,7 +131,22 @@ export default function OnboardingPage() {
                 </>
               )}
               {step === 1 && (
-                <Textarea value={competitors} onChange={(event) => setCompetitors(event.target.value)} placeholder="Competitor URLs, one per line." />
+                <div className="space-y-2">
+                  <label htmlFor="competitors" className="text-sm font-black uppercase">
+                    Competitor URLs
+                  </label>
+                  <Textarea
+                    id="competitors"
+                    name="competitors"
+                    value={competitors}
+                    onChange={(event) => setCompetitors(event.currentTarget.value)}
+                    placeholder="https://competitor-one.com&#10;https://competitor-two.com"
+                    className="min-h-48"
+                  />
+                  <p className="text-sm font-bold text-ink/70">
+                    Add one competitor website per line. The competitor worker will use this during analysis.
+                  </p>
+                </div>
               )}
               {step === 2 && (
                 <>

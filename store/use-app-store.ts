@@ -11,7 +11,8 @@ type WorkspaceItem = {
 };
 
 type WorkerRun = {
-  agent: "seo" | "audience" | "persona" | "content";
+  id?: string;
+  agent: "seo" | "competitor" | "audience" | "persona";
   status: "queued" | "running" | "completed" | "failed";
   output?: string;
   updatedAt: string;

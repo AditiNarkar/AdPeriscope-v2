@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { Card } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { metrics } from "@/lib/mock-data";
 import { useAppStore } from "@/store/use-app-store";
 
 export default function DashboardPage() {
-  const { activeWorkspaceId, workspaces, workerRuns } = useAppStore();
+  const { activeWorkspaceId, workspaces, workerRuns, setWorkerRuns } = useAppStore();
   const workspace = workspaces.find((item) => item.id === activeWorkspaceId);
   const runs = activeWorkspaceId ? workerRuns[activeWorkspaceId] ?? [] : [];
   const completed = runs.filter((run) => run.status === "completed").length;
@@ -19,6 +20,37 @@ export default function DashboardPage() {
   const failed = runs.filter((run) => run.status === "failed").length;
   const total = runs.length || 4;
   const completionPercent = Math.round((completed / total) * 100);
+
+  useEffect(() => {
+    if (!activeWorkspaceId) return;
+
+    let cancelled = false;
+
+    async function loadRuns() {
+      try {
+        const response = await fetch(`/api/workspaces/${activeWorkspaceId}/agent-runs`);
+        if (!response.ok) return;
+        const data = (await response.json()) as {
+          runs: {
+            id?: string;
+            agent: "seo" | "competitor" | "audience" | "persona";
+            status: "queued" | "running" | "completed" | "failed";
+            output?: string;
+            updatedAt: string;
+          }[];
+        };
+        if (!cancelled) setWorkerRuns(activeWorkspaceId, data.runs);
+      } catch {
+        // The dashboard can still show optimistic local runs if the backend is unavailable.
+      }
+    }
+
+    loadRuns();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeWorkspaceId, setWorkerRuns]);
 
   return (
     <DashboardShell title="AI Command Center" eyebrow={workspace?.name ?? "No workspace selected"}>
@@ -83,7 +115,7 @@ export default function DashboardPage() {
               <h2 className="text-xl font-black">Worker Status</h2>
               <div className="mt-4 space-y-3">
                 {runs.length ? runs.map((run) => (
-                  <article key={run.agent} className="rounded-brutal border-2 border-ink bg-white p-3">
+                  <article key={run.id ?? run.agent} className="rounded-brutal border-2 border-ink bg-white p-3">
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="font-black uppercase">{run.agent} worker</h3>
                       <span className="text-xs font-black uppercase">{run.status}</span>
@@ -104,7 +136,7 @@ export default function DashboardPage() {
               <h2 className="text-xl font-black">Worker Outputs</h2>
               <div className="mt-4 space-y-3 font-bold">
                 {runs.filter((run) => run.output).length ? runs.filter((run) => run.output).map((run) => (
-                  <div key={run.agent} className="rounded-brutal border-2 border-ink bg-white p-3">
+                  <div key={run.id ?? run.agent} className="rounded-brutal border-2 border-ink bg-white p-3">
                     <p className="text-xs font-black uppercase">{run.agent}</p>
                     <p className="mt-2 whitespace-pre-wrap text-sm">{run.output}</p>
                   </div>

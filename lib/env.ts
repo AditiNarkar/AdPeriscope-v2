@@ -2,6 +2,7 @@ import { z } from "zod";
 import { log, maskSecret } from "@/lib/logger";
 
 const envSchema = z.object({
+  APP_MODE: z.enum(["DEVELOPMENT", "PRODUCTION"]).default("DEVELOPMENT"),
   DATABASE_URL: z.string().optional(),
   NEXTAUTH_SECRET: z.string().optional(),
   NEXTAUTH_URL: z.string().optional(),
@@ -23,6 +24,7 @@ export const env = envSchema.parse(process.env);
 export function getEnvStatus() {
   return {
     DATABASE_URL: env.DATABASE_URL ? "configured" : "missing",
+    APP_MODE: env.APP_MODE,
     NEXTAUTH_SECRET: env.NEXTAUTH_SECRET ? "configured" : "missing",
     NEXTAUTH_URL: env.NEXTAUTH_URL ?? "missing",
     AI_PROVIDER: env.AI_PROVIDER ?? "ollama",
