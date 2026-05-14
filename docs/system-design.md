@@ -13,7 +13,8 @@ flowchart TB
     marketing["Marketing Pages<br/>Landing, pricing"]
     authPages["Auth Pages<br/>Sign in, sign up"]
     onboarding["Onboarding Flow<br/>Brand, competitors, audience"]
-    dashboards["Dashboard UX<br/>Command center, SEO, competitors, audience, personas, planner, assistant, team, settings"]
+    workspaces["My Workspaces<br/>List and launch workspaces"]
+    dashboards["Dashboard UX<br/>Command center, SEO, competitors, audience, personas, planner, assistant, settings"]
     ui["Reusable UI System<br/>Neobrutal cards, buttons, inputs, skeletons, charts, layout shell"]
     store["Zustand Store<br/>Workspace state, dark mode"]
     hooks["Client Hooks<br/>Agent run hooks, optimistic UI flows"]
@@ -82,8 +83,11 @@ flowchart TB
   user --> browser
   browser --> marketing
   browser --> authPages
+  authPages --> workspaces
   browser --> onboarding
+  browser --> workspaces
   browser --> dashboards
+  workspaces --> dashboards
   dashboards --> ui
   dashboards --> store
   dashboards --> hooks
@@ -205,8 +209,7 @@ flowchart LR
 
 ```mermaid
 erDiagram
-  User ||--o{ Membership : has
-  Workspace ||--o{ Membership : contains
+  User ||--o{ Workspace : owns
   Workspace ||--o{ Competitor : tracks
   Workspace ||--o{ AgentRun : owns
   Workspace ||--o{ Report : exports
@@ -226,15 +229,9 @@ erDiagram
     string name
     string slug
     string brandBrief
+    string userId
     datetime createdAt
     datetime updatedAt
-  }
-
-  Membership {
-    string id
-    Role role
-    string userId
-    string workspaceId
   }
 
   Competitor {
@@ -305,7 +302,7 @@ flowchart TB
 ## Key Production Concerns
 
 - Authentication: NextAuth OAuth routes are scaffolded for Google and GitHub.
-- Authorization: Workspace membership roles should guard all workspace-scoped reads and writes.
+- Authorization: Workspace reads and writes should be scoped to `Workspace.userId`.
 - Reliability: Long-running agent scans should go through BullMQ workers rather than blocking API routes.
 - Observability: `lib/logger.ts` emits structured JSON logs; production should add traces and job metrics.
 - Rate limiting: API routes include a simple in-memory limiter; production should replace it with Redis-backed limits.

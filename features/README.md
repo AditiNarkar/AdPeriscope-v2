@@ -8,4 +8,3 @@ Feature folders are reserved for deeper domain slices as the product grows:
 - `personas`: customer archetypes, tone, positioning, and messaging.
 - `planner`: calendars, campaigns, scheduling, and repurposing.
 - `assistant`: ChatGPT-style strategy workspace.
-- `team`: workspace roles, comments, notifications, and approvals.

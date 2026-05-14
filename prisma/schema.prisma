@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  email       String       @unique
-  name        String?
-  image       String?
-  memberships Membership[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id         String      @id @default(cuid())
+  email      String      @unique
+  name       String?
+  image      String?
+  workspaces Workspace[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model Workspace {
@@ -22,24 +22,16 @@ model Workspace {
   name        String
   slug        String       @unique
   brandBrief  String?
-  memberships Membership[]
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   competitors Competitor[]
   agentRuns   AgentRun[]
   painPoints  PainPoint[]
   reports     Report[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-}
 
-model Membership {
-  id          String    @id @default(cuid())
-  role        Role      @default(MEMBER)
-  userId      String
-  workspaceId String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, workspaceId])
+  @@index([userId])
 }
 
 model Competitor {
@@ -86,13 +78,6 @@ model Report {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
-}
-
-enum Role {
-  OWNER
-  ADMIN
-  MEMBER
-  VIEWER
 }
 
 enum AgentType {

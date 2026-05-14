@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
   Bot,
   CalendarDays,
   Compass,
   Eye,
   FileText,
+  FolderKanban,
   Gauge,
   Search,
   Settings,
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/use-app-store";
 
 const nav = [
+  { href: "/workspaces", label: "Workspaces", icon: FolderKanban },
   { href: "/dashboard", label: "Command", icon: Gauge },
   { href: "/dashboard/competitors", label: "Competitors", icon: Eye },
   { href: "/dashboard/seo", label: "SEO", icon: Search },
@@ -25,7 +26,6 @@ const nav = [
   { href: "/dashboard/personas", label: "Personas", icon: Users },
   { href: "/dashboard/planner", label: "Planner", icon: CalendarDays },
   { href: "/dashboard/assistant", label: "Assistant", icon: Bot },
-  { href: "/dashboard/team", label: "Team", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings }
 ];
 

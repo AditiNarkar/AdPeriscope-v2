@@ -2,6 +2,8 @@
 
 AdPeriscope is a full-stack AI-powered digital marketing automation platform for content strategy, SEO research, competitor intelligence, audience analysis, brand personas, and campaign planning.
 
+The workspace model is intentionally simple: one user owns many workspaces.
+
 ## Stack
 
 - Next.js 15, TypeScript, TailwindCSS, Framer Motion-ready UI, Recharts, Zustand

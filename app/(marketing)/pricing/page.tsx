@@ -6,8 +6,8 @@ import { Card } from "@/components/ui/card";
 
 const plans = [
   { name: "Creator", price: "$29", color: "bg-bolt", features: ["1 workspace", "500 AI credits", "Pain-point explorer", "Content planner"] },
-  { name: "Startup", price: "$99", color: "bg-acid", features: ["5 workspaces", "5K AI credits", "Competitor tracking", "PDF reports", "Team seats"] },
-  { name: "Agency", price: "$249", color: "bg-hot", features: ["Unlimited clients", "Scheduled agents", "White-label exports", "Priority workflows"] }
+  { name: "Startup", price: "$99", color: "bg-acid", features: ["5 workspaces", "5K AI credits", "Competitor tracking", "PDF reports"] },
+  { name: "Agency", price: "$249", color: "bg-hot", features: ["Unlimited workspaces", "Scheduled agents", "White-label exports", "Priority workflows"] }
 ];
 
 export default function PricingPage() {
@@ -15,7 +15,7 @@ export default function PricingPage() {
     <main className="min-h-screen bg-paper text-ink">
       <MarketingNav />
       <section className="mx-auto max-w-7xl px-4 py-14">
-        <h1 className="max-w-3xl text-5xl font-black md:text-7xl">Plans for teams that ship marketing every week.</h1>
+        <h1 className="max-w-3xl text-5xl font-black md:text-7xl">Plans for creators and businesses that ship marketing every week.</h1>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {plans.map((plan) => (
             <Card key={plan.name} className={plan.color}>

@@ -20,7 +20,7 @@ function providerIsConfigured(provider: OAuthProvider) {
 
 export async function continueWithOAuth(formData: FormData) {
   const provider = formData.get("provider");
-  const redirectTo = "/onboarding";
+  const redirectTo = "/workspaces";
 
   if (!isOAuthProvider(provider)) {
     redirect("/sign-in?error=invalid-provider");
