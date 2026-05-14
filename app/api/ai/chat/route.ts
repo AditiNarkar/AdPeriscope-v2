@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { withApiLogging } from "@/lib/api-logging";
 import { log } from "@/lib/logger";
-import { generateText } from "@/services/ai/openai-client";
+import { generateText } from "@/services/ai/provider";
 
 const bodySchema = z.object({
   message: z.string().min(1),

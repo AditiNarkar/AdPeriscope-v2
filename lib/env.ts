@@ -5,7 +5,10 @@ const envSchema = z.object({
   DATABASE_URL: z.string().optional(),
   NEXTAUTH_SECRET: z.string().optional(),
   NEXTAUTH_URL: z.string().optional(),
-  OPENAI_API_KEY: z.string().optional(),
+  AI_PROVIDER: z.string().optional(),
+  OLLAMA_BASE_URL: z.string().optional(),
+  OLLAMA_MODEL: z.string().optional(),
+  OLLAMA_EMBEDDING_MODEL: z.string().optional(),
   REDIS_URL: z.string().optional(),
   SUPABASE_URL: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
@@ -22,7 +25,10 @@ export function getEnvStatus() {
     DATABASE_URL: env.DATABASE_URL ? "configured" : "missing",
     NEXTAUTH_SECRET: env.NEXTAUTH_SECRET ? "configured" : "missing",
     NEXTAUTH_URL: env.NEXTAUTH_URL ?? "missing",
-    OPENAI_API_KEY: maskSecret(env.OPENAI_API_KEY),
+    AI_PROVIDER: env.AI_PROVIDER ?? "ollama",
+    OLLAMA_BASE_URL: env.OLLAMA_BASE_URL ?? "http://localhost:11434",
+    OLLAMA_MODEL: env.OLLAMA_MODEL ?? "llama3.1:8b",
+    OLLAMA_EMBEDDING_MODEL: env.OLLAMA_EMBEDDING_MODEL ?? "nomic-embed-text",
     REDIS_URL: env.REDIS_URL ?? "missing",
     SUPABASE_URL: env.SUPABASE_URL ?? "missing",
     SUPABASE_SERVICE_ROLE_KEY: maskSecret(env.SUPABASE_SERVICE_ROLE_KEY),
@@ -36,7 +42,7 @@ export function getEnvStatus() {
 export function logEnvStatus() {
   log("info", "Environment status checked", {
     env: getEnvStatus(),
-    demoMode: !env.OPENAI_API_KEY || !env.DATABASE_URL
+    demoMode: !env.DATABASE_URL
   });
 }
 

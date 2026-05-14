@@ -1,4 +1,4 @@
-import type { CompetitorSignal, ContentPlanItem, Insight, PainPoint } from "@/types/marketing";
+import type { CompetitorSignal, Insight, PainPoint } from "@/types/marketing";
 
 export const metrics = [
   { label: "AI opportunities", value: "0", change: "0", tone: "bg-acid" },
@@ -22,5 +22,3 @@ export const insights: Insight[] = [];
 export const competitors: CompetitorSignal[] = [];
 
 export const painPoints: PainPoint[] = [];
-
-export const calendar: ContentPlanItem[] = [];

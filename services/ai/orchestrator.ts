@@ -1,7 +1,7 @@
 import type { AgentId } from "@/types/marketing";
 import { runMarketingAgent } from "@/agents/base-agent";
 
-export async function orchestrateStrategyBrief(query: string, agents: AgentId[] = ["seo", "competitor", "audience", "content"]) {
+export async function orchestrateStrategyBrief(query: string, agents: AgentId[] = ["seo", "competitor", "audience", "persona"]) {
   const runs = await Promise.all(agents.map((agent) => runMarketingAgent({ agent, query })));
   return {
     summary: "Multi-agent strategy brief generated from specialized research passes.",

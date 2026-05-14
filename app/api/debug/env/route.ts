@@ -8,11 +8,12 @@ export const GET = withApiLogging("/api/debug/env", async () => {
   log("info", "Returning safe environment status", { env });
 
   return NextResponse.json({
-    demoMode: env.OPENAI_API_KEY === "missing" || env.DATABASE_URL === "missing",
+    demoMode: env.DATABASE_URL === "missing",
     env,
     notes: [
       "Secret values are masked and never returned in full.",
-      "Missing OPENAI_API_KEY means AI routes return demo responses.",
+      "AI routes use Ollama by default.",
+      "If Ollama is not running, AI routes return an actionable setup message.",
       "Missing DATABASE_URL means persistence is not active."
     ]
   });

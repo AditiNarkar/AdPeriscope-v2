@@ -6,7 +6,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { log } from "@/lib/logger";
 
 const bodySchema = z.object({
-  agent: z.enum(["seo", "competitor", "audience", "persona", "content"]),
+  agent: z.enum(["seo", "competitor", "audience", "persona"]),
   query: z.string().min(3),
   sources: z.array(z.string()).optional()
 });

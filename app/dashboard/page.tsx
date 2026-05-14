@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 import { MetricCard } from "@/components/dashboard/metric-card";
-import { TrendChart } from "@/components/charts/trend-chart";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -15,6 +13,12 @@ export default function DashboardPage() {
   const { activeWorkspaceId, workspaces, workerRuns } = useAppStore();
   const workspace = workspaces.find((item) => item.id === activeWorkspaceId);
   const runs = activeWorkspaceId ? workerRuns[activeWorkspaceId] ?? [] : [];
+  const completed = runs.filter((run) => run.status === "completed").length;
+  const running = runs.filter((run) => run.status === "running").length;
+  const queued = runs.filter((run) => run.status === "queued").length;
+  const failed = runs.filter((run) => run.status === "failed").length;
+  const total = runs.length || 4;
+  const completionPercent = Math.round((completed / total) * 100);
 
   return (
     <DashboardShell title="AI Command Center" eyebrow={workspace?.name ?? "No workspace selected"}>
@@ -46,8 +50,34 @@ export default function DashboardPage() {
 
           <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_0.8fr]">
             <Card className="bg-white">
-              <h2 className="text-2xl font-black">Growth signals</h2>
-              <TrendChart />
+              <h2 className="text-2xl font-black">Worker progress</h2>
+              <p className="mt-2 font-bold text-ink/70">
+                Current state of the AI workers started from onboarding.
+              </p>
+              <div className="mt-6">
+                <div className="flex items-end justify-between gap-4">
+                  <span className="text-6xl font-black">{completionPercent}%</span>
+                  <span className="rounded-brutal border-4 border-ink bg-acid px-4 py-2 text-sm font-black uppercase shadow-brutal-sm">
+                    {completed}/{total} complete
+                  </span>
+                </div>
+                <div className="mt-4 h-8 overflow-hidden rounded-brutal border-4 border-ink bg-bone">
+                  <div className="h-full bg-acid transition-all" style={{ width: `${completionPercent}%` }} />
+                </div>
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-4">
+                {[
+                  ["Completed", completed, "bg-acid"],
+                  ["Running", running, "bg-bolt"],
+                  ["Queued", queued, "bg-white"],
+                  ["Failed", failed, "bg-hot"]
+                ].map(([label, value, tone]) => (
+                  <div key={label} className={`rounded-brutal border-2 border-ink p-3 ${tone}`}>
+                    <p className="text-xs font-black uppercase">{label}</p>
+                    <p className="mt-2 text-3xl font-black">{value}</p>
+                  </div>
+                ))}
+              </div>
             </Card>
             <Card className="bg-acid">
               <h2 className="text-xl font-black">Worker Status</h2>
@@ -69,8 +99,7 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          <div className="mt-5 grid gap-5 lg:grid-cols-2">
-            <ActivityTimeline items={runs.map((run) => `${run.agent} worker is ${run.status}`)} />
+          <div className="mt-5">
             <Card className="bg-bolt">
               <h2 className="text-xl font-black">Worker Outputs</h2>
               <div className="mt-4 space-y-3 font-bold">

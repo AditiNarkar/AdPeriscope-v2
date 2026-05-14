@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bot,
-  CalendarDays,
   Compass,
   Eye,
   FileText,
@@ -24,7 +23,6 @@ const nav = [
   { href: "/dashboard/seo", label: "SEO", icon: Search },
   { href: "/dashboard/audience", label: "Audience", icon: Compass },
   { href: "/dashboard/personas", label: "Personas", icon: Users },
-  { href: "/dashboard/planner", label: "Planner", icon: CalendarDays },
   { href: "/dashboard/assistant", label: "Assistant", icon: Bot },
   { href: "/dashboard/settings", label: "Settings", icon: Settings }
 ];

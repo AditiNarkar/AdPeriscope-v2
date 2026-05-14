@@ -1,6 +1,6 @@
 import type { AgentId } from "@/types/marketing";
 import { buildAgentPrompt } from "@/prompts/agents";
-import { generateText } from "@/services/ai/openai-client";
+import { generateText } from "@/services/ai/provider";
 import { log } from "@/lib/logger";
 
 export type AgentRunInput = {

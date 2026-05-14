@@ -85,7 +85,6 @@ enum AgentType {
   COMPETITOR
   AUDIENCE
   PERSONA
-  CONTENT
 }
 
 enum RunStatus {

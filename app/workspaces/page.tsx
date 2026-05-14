@@ -110,7 +110,7 @@ export default function WorkspacesPage() {
             ) : workspaces.length === 0 ? (
               <EmptyState
                 title="No workspaces yet"
-                description="Launch a workspace to start organizing prompts, SEO scans, personas, pain points, competitors, and content plans."
+                description="Launch a workspace to start organizing prompts, SEO scans, personas, pain points, and competitors."
               />
             ) : (
               workspaces.map((item) => (

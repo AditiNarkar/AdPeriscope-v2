@@ -12,7 +12,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { useAppStore } from "@/store/use-app-store";
 
 const steps = ["Brand", "Competitors", "Audience"];
-const agents = ["seo", "audience", "persona", "content"] as const;
+const agents = ["seo", "audience", "persona"] as const;
 
 export default function OnboardingPage() {
   const router = useRouter();

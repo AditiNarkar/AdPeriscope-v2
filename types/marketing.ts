@@ -1,4 +1,4 @@
-export type AgentId = "seo" | "competitor" | "audience" | "persona" | "content";
+export type AgentId = "seo" | "competitor" | "audience" | "persona";
 
 export type Insight = {
   title: string;
@@ -21,12 +21,4 @@ export type PainPoint = {
   intensity: number;
   source: "reddit" | "youtube" | "rss" | "web";
   quote: string;
-};
-
-export type ContentPlanItem = {
-  day: string;
-  channel: string;
-  hook: string;
-  format: string;
-  cta: string;
 };

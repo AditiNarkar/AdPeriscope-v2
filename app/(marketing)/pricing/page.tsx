@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 const plans = [
-  { name: "Creator", price: "$29", color: "bg-bolt", features: ["1 workspace", "500 AI credits", "Pain-point explorer", "Content planner"] },
+  { name: "Creator", price: "$29", color: "bg-bolt", features: ["1 workspace", "500 AI credits", "Pain-point explorer", "Persona generator"] },
   { name: "Startup", price: "$99", color: "bg-acid", features: ["5 workspaces", "5K AI credits", "Competitor tracking", "PDF reports"] },
   { name: "Agency", price: "$249", color: "bg-hot", features: ["Unlimited workspaces", "Scheduled agents", "White-label exports", "Priority workflows"] }
 ];

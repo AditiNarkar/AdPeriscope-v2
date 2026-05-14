@@ -22,14 +22,12 @@ type AppState = {
   activeWorkspaceId: string;
   workspaces: WorkspaceItem[];
   workerRuns: Record<string, WorkerRun[]>;
-  darkMode: boolean;
   setWorkspace: (workspace: string, workspaceId?: string) => void;
   setWorkspaces: (workspaces: WorkspaceItem[]) => void;
   addWorkspace: (workspace: WorkspaceItem) => void;
   updateWorkspace: (workspaceId: string, patch: Partial<WorkspaceItem>) => void;
   setWorkerRuns: (workspaceId: string, runs: WorkerRun[]) => void;
   updateWorkerRun: (workspaceId: string, run: WorkerRun) => void;
-  toggleDarkMode: () => void;
 };
 
 export const useAppStore = create<AppState>()(
@@ -39,7 +37,6 @@ export const useAppStore = create<AppState>()(
       activeWorkspaceId: "",
       workspaces: [],
       workerRuns: {},
-      darkMode: false,
       setWorkspace: (workspace, workspaceId) => set({ workspace, activeWorkspaceId: workspaceId ?? "" }),
       setWorkspaces: (workspaces) =>
         set((state) => ({
@@ -82,8 +79,7 @@ export const useAppStore = create<AppState>()(
               ]
             }
           };
-        }),
-      toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode }))
+        })
     }),
     {
       name: "adperiscope-user-workspaces",

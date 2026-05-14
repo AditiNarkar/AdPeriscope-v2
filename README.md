@@ -9,7 +9,7 @@ The workspace model is intentionally simple: one user owns many workspaces.
 - Next.js 15, TypeScript, TailwindCSS, Framer Motion-ready UI, Recharts, Zustand
 - PostgreSQL with Prisma ORM
 - NextAuth OAuth scaffold
-- OpenAI API service layer with multi-agent orchestration
+- Ollama AI service layer with multi-agent orchestration
 - BullMQ worker architecture for scheduled/background agent runs
 - Supabase storage abstraction for report exports
 - Public data adapters for Reddit, YouTube, RSS, competitor websites, Firecrawl, and Playwright
@@ -75,13 +75,12 @@ npm run worker
 - Competitor Intelligence Agent: content cadence, headlines, viral patterns, competitor overlap
 - Audience Insight Agent: Reddit/YouTube/RSS/web pain-point mining and clustering
 - Brand Persona Agent: target personas, tone, positioning, archetypes
-- Content Strategy Agent: calendars, hooks, platform strategies, hashtags, repurposing
 
-When `OPENAI_API_KEY` is missing, API routes return deterministic demo responses so the product can run in investor/demo mode.
+AI routes use Ollama by default. Run `ollama serve`, then pull the configured models from `.env`.
 
 ## Bonus Architecture
 
 - Chrome extension: add an extension package that sends current-page competitor/article data to `/api/competitors`.
 - Social scheduler: add provider adapters under `services/social` and schedule jobs via BullMQ.
 - Notifications: add notification models and push/email adapters.
-- Campaign scoring: evaluate content plans using SEO score, audience intensity, competitor gap, and conversion fit.
+- Campaign scoring: evaluate workspace strategy using SEO score, audience intensity, competitor gap, and conversion fit.

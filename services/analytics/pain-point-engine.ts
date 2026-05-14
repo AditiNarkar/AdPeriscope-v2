@@ -1,4 +1,4 @@
-import { embedText } from "@/services/ai/openai-client";
+import { embedText } from "@/services/ai/provider";
 import type { PainPoint } from "@/types/marketing";
 import type { ScrapedDiscussion } from "@/services/scraping/public-sources";
 import { log } from "@/lib/logger";
