@@ -28,7 +28,8 @@ const config: Config = {
         brutal: "10px"
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"]
+        sans: ["Space Grotesk", "system-ui", "sans-serif"],
+        display: ["Archivo Black", "Impact", "system-ui", "sans-serif"]
       }
     }
   },

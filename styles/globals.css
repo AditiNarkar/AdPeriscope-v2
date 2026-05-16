@@ -24,6 +24,15 @@ body {
   color: var(--foreground);
 }
 
+h1,
+h2,
+h3,
+.font-display {
+  font-family: "Archivo Black", Impact, system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
 ::selection {
   background: #d7ff2f;
   color: #111111;

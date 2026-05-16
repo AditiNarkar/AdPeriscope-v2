@@ -27,6 +27,7 @@ type AppState = {
   setWorkspaces: (workspaces: WorkspaceItem[]) => void;
   addWorkspace: (workspace: WorkspaceItem) => void;
   updateWorkspace: (workspaceId: string, patch: Partial<WorkspaceItem>) => void;
+  removeWorkspace: (workspaceId: string) => void;
   setWorkerRuns: (workspaceId: string, runs: WorkerRun[]) => void;
   updateWorkerRun: (workspaceId: string, run: WorkerRun) => void;
 };
@@ -64,6 +65,19 @@ export const useAppStore = create<AppState>()(
               ? patch.name
               : state.workspace
         })),
+      removeWorkspace: (workspaceId) =>
+        set((state) => {
+          const remaining = state.workspaces.filter((item) => item.id !== workspaceId);
+          const nextActive = state.activeWorkspaceId === workspaceId ? remaining[0] : undefined;
+          const { [workspaceId]: _removedRuns, ...workerRuns } = state.workerRuns;
+
+          return {
+            workspaces: remaining,
+            workerRuns,
+            workspace: nextActive ? nextActive.name : state.activeWorkspaceId === workspaceId ? "" : state.workspace,
+            activeWorkspaceId: nextActive ? nextActive.id : state.activeWorkspaceId === workspaceId ? "" : state.activeWorkspaceId
+          };
+        }),
       setWorkerRuns: (workspaceId, runs) =>
         set((state) => ({
           workerRuns: { ...state.workerRuns, [workspaceId]: runs }

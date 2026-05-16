@@ -63,3 +63,32 @@ export const PATCH = withApiLogging("/api/workspaces/[id]", async (request: Next
     }
   });
 });
+
+export const DELETE = withApiLogging("/api/workspaces/[id]", async (request: NextRequest) => {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+  }
+
+  const workspaceId = request.nextUrl.pathname.split("/").at(-1);
+  if (!workspaceId) {
+    return NextResponse.json({ error: "Workspace id required" }, { status: 400 });
+  }
+
+  const workspace = await prisma.workspace.findFirst({
+    where: { id: workspaceId, userId },
+    select: { id: true }
+  });
+
+  if (!workspace) {
+    return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
+  }
+
+  await prisma.workspace.delete({
+    where: { id: workspace.id }
+  });
+
+  log("info", "Deleted user workspace", { userId, workspaceId });
+
+  return NextResponse.json({ ok: true });
+});
