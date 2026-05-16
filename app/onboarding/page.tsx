@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input, Textarea } from "@/components/ui/input";
 import { useAppStore } from "@/store/use-app-store";
+import type { AgentStructuredOutput } from "@/types/marketing";
 
 const steps = ["Brand", "Competitors", "Audience"];
 const agents = ["seo", "competitor", "audience", "persona"] as const;
@@ -76,6 +77,7 @@ export default function OnboardingPage() {
             agent: (typeof agents)[number];
             status: "queued" | "running" | "completed" | "failed";
             output?: string;
+            structuredOutput?: AgentStructuredOutput | null;
             updatedAt: string;
           }[];
         },

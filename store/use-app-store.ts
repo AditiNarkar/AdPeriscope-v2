@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import type { AgentStructuredOutput } from "@/types/marketing";
 
 type WorkspaceItem = {
   id: string;
@@ -15,6 +16,7 @@ type WorkerRun = {
   agent: "seo" | "competitor" | "audience" | "persona";
   status: "queued" | "running" | "completed" | "failed";
   output?: string;
+  structuredOutput?: AgentStructuredOutput | null;
   updatedAt: string;
 };
 

@@ -7,7 +7,7 @@ import { env } from "@/lib/env";
 import { log } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { scrapeCompetitorHomepages } from "@/services/scraping/public-sources";
-import type { AgentId } from "@/types/marketing";
+import type { AgentId, AgentStructuredOutput } from "@/types/marketing";
 
 const agentSchema = z.enum(["seo", "competitor", "audience", "persona"]);
 
@@ -59,6 +59,14 @@ function outputText(output: unknown) {
   if (typeof record.text === "string") return record.text;
   if (typeof record.error === "string") return record.error;
   return undefined;
+}
+
+function outputStructured(output: unknown): AgentStructuredOutput | null {
+  if (!output || typeof output !== "object") return null;
+  const record = output as Record<string, unknown>;
+  const structured = record.structuredOutput;
+  if (!structured || typeof structured !== "object") return null;
+  return structured as AgentStructuredOutput;
 }
 
 function removeCompetitorContext(query: string) {
@@ -128,8 +136,47 @@ function mapRun(run: {
     agent: fromDbAgent(run.agent),
     status: fromDbStatus(run.status),
     output: outputText(run.output),
+    structuredOutput: outputStructured(run.output),
     updatedAt: run.updatedAt.toISOString()
   };
+}
+
+async function persistSourceDocuments(workspaceId: string, sources: Awaited<ReturnType<typeof scrapeCompetitorHomepages>>) {
+  const savedSources = [];
+
+  for (const source of sources) {
+    const saved = await prisma.sourceDocument.upsert({
+      where: {
+        workspaceId_url: {
+          workspaceId,
+          url: source.url
+        }
+      },
+      update: {
+        title: source.title,
+        text: source.text,
+        metadata: {
+          chars: source.text.length,
+          collectedBy: "low-load-homepage-fetch"
+        }
+      },
+      create: {
+        type: "WEB",
+        title: source.title,
+        url: source.url,
+        text: source.text,
+        metadata: {
+          chars: source.text.length,
+          collectedBy: "low-load-homepage-fetch"
+        },
+        workspaceId
+      }
+    });
+
+    savedSources.push(saved);
+  }
+
+  return savedSources;
 }
 
 export const GET = withApiLogging("/api/workspaces/[id]/agent-runs", async (request: NextRequest) => {
@@ -157,6 +204,7 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
   const body = bodySchema.parse(await request.json());
   const shouldScrapeCompetitors = body.agents.includes("competitor");
   const webSources = shouldScrapeCompetitors ? await scrapeCompetitorHomepages(body.query) : [];
+  const sourceDocuments = await persistSourceDocuments(workspace.workspaceId, webSources);
   const sourceSnippets = webSources.map((source) =>
     [
       `Title: ${source.title}`,
@@ -171,7 +219,8 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
     workspaceId: workspace.workspaceId,
     agents: body.agents,
     appMode: env.APP_MODE,
-    sourceCount: sourceSnippets.length
+    sourceCount: sourceSnippets.length,
+    sourceDocumentCount: sourceDocuments.length
   });
 
   if (env.APP_MODE === "PRODUCTION") {
@@ -240,10 +289,12 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
           status: "COMPLETED",
           output: {
             text: result.output,
+            structuredOutput: result.structuredOutput,
             providerRunId: result.runId,
             sources:
               agent === "competitor"
-                ? webSources.map((source) => ({
+                ? sourceDocuments.map((source) => ({
+                    id: source.id,
                     title: source.title,
                     url: source.url,
                     chars: source.text.length

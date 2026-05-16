@@ -28,6 +28,7 @@ model Workspace {
   agentRuns   AgentRun[]
   painPoints  PainPoint[]
   reports     Report[]
+  sources     SourceDocument[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -55,6 +56,23 @@ model AgentRun {
   workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+}
+
+model SourceDocument {
+  id          String     @id @default(cuid())
+  type        SourceType
+  title       String
+  url         String
+  text        String
+  metadata    Json?
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([workspaceId, url])
+  @@index([workspaceId])
+  @@index([type])
 }
 
 model PainPoint {
@@ -92,4 +110,11 @@ enum RunStatus {
   RUNNING
   COMPLETED
   FAILED
+}
+
+enum SourceType {
+  WEB
+  REDDIT
+  YOUTUBE
+  RSS
 }

@@ -40,6 +40,7 @@ new Worker(
             status: "COMPLETED",
             output: {
               text: result.output,
+              structuredOutput: result.structuredOutput,
               providerRunId: result.runId
             }
           }

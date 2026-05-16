@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { metrics } from "@/lib/mock-data";
 import { useAppStore } from "@/store/use-app-store";
+import type { AgentStructuredOutput } from "@/types/marketing";
 
 function statusTone(status: "queued" | "running" | "completed" | "failed") {
   if (status === "completed") return "bg-acid";
@@ -85,6 +86,41 @@ function MarkdownOutput({ text }: { text: string }) {
   );
 }
 
+function OutputList({ title, items, tone }: { title: string; items: string[]; tone: string }) {
+  if (!items.length) return null;
+
+  return (
+    <section className="rounded-brutal border-2 border-ink bg-paper p-3">
+      <p className="text-xs font-black uppercase">{title}</p>
+      <div className="mt-3 space-y-2">
+        {items.map((item, index) => (
+          <div key={`${title}-${item}-${index}`} className="flex gap-2">
+            <span className={`mt-1.5 size-3 shrink-0 rounded-full border-2 border-ink ${tone}`} />
+            <p className="text-sm font-semibold leading-relaxed text-ink/80">{item}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function StructuredOutput({ output }: { output: AgentStructuredOutput }) {
+  return (
+    <div className="space-y-3">
+      <OutputList title="Findings" items={output.findings} tone="bg-bolt" />
+      <OutputList title="Opportunities" items={output.opportunities} tone="bg-acid" />
+      <OutputList title="Recommended Actions" items={output.recommendedActions} tone="bg-hot" />
+      <OutputList title="Risks" items={output.risks} tone="bg-bone" />
+      {output.nextExperiment ? (
+        <section className="rounded-brutal border-2 border-ink bg-white p-3 shadow-brutal-sm">
+          <p className="text-xs font-black uppercase">Next Experiment</p>
+          <p className="mt-2 text-sm font-semibold leading-relaxed text-ink/80">{output.nextExperiment}</p>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { activeWorkspaceId, workspaces, workerRuns, setWorkerRuns } = useAppStore();
   const workspace = workspaces.find((item) => item.id === activeWorkspaceId);
@@ -111,6 +147,7 @@ export default function DashboardPage() {
             agent: "seo" | "competitor" | "audience" | "persona";
             status: "queued" | "running" | "completed" | "failed";
             output?: string;
+            structuredOutput?: AgentStructuredOutput | null;
             updatedAt: string;
           }[];
         };
@@ -219,7 +256,11 @@ export default function DashboardPage() {
                         {run.status}
                       </span>
                     </div>
-                    <MarkdownOutput text={run.output ?? ""} />
+                    {run.structuredOutput ? (
+                      <StructuredOutput output={run.structuredOutput} />
+                    ) : (
+                      <MarkdownOutput text={run.output ?? ""} />
+                    )}
                   </div>
                 )) : (
                   <p className="rounded-brutal border-2 border-ink bg-white p-3">

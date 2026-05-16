@@ -8,5 +8,17 @@ export const agentPrompts: Record<AgentId, string> = {
 };
 
 export function buildAgentPrompt(agent: AgentId, input: string) {
-  return `${agentPrompts[agent]}\n\nBusiness context:\n${input}\n\nRespond with concise sections: Findings, Opportunities, Recommended Actions, Risks, Next Experiment.`;
+  return `${agentPrompts[agent]}
+
+Business context:
+${input}
+
+Return only valid JSON. Do not wrap it in markdown. Use exactly this shape:
+{
+  "findings": ["short factual finding"],
+  "opportunities": ["specific opportunity"],
+  "recommendedActions": ["action the user can take next"],
+  "risks": ["risk or caveat"],
+  "nextExperiment": "one concrete experiment to run next"
+}`;
 }

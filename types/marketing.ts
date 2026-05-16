@@ -1,5 +1,13 @@
 export type AgentId = "seo" | "competitor" | "audience" | "persona";
 
+export type AgentStructuredOutput = {
+  findings: string[];
+  opportunities: string[];
+  recommendedActions: string[];
+  risks: string[];
+  nextExperiment: string;
+};
+
 export type Insight = {
   title: string;
   summary: string;
