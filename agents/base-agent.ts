@@ -10,6 +10,15 @@ export type AgentRunInput = {
   sources?: string[];
 };
 
+function formatSources(sources?: string[]) {
+  if (!sources?.length) return "";
+
+  return [
+    "Grounding sources:",
+    ...sources.map((source, index) => `Source ${index + 1}:\n${source}`)
+  ].join("\n\n");
+}
+
 export async function runMarketingAgent(input: AgentRunInput) {
   const runId = crypto.randomUUID();
   log("info", "Marketing agent run started", {
@@ -22,7 +31,7 @@ export async function runMarketingAgent(input: AgentRunInput) {
 
   const prompt = buildAgentPrompt(input.agent, [
     input.query,
-    input.sources?.length ? `Sources: ${input.sources.join(", ")}` : ""
+    formatSources(input.sources)
   ].join("\n"));
 
   const output = await generateText(prompt);

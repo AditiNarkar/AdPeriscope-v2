@@ -6,6 +6,7 @@ import { withApiLogging } from "@/lib/api-logging";
 import { env } from "@/lib/env";
 import { log } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
+import { scrapeCompetitorHomepages } from "@/services/scraping/public-sources";
 import type { AgentId } from "@/types/marketing";
 
 const agentSchema = z.enum(["seo", "competitor", "audience", "persona"]);
@@ -58,6 +59,38 @@ function outputText(output: unknown) {
   if (typeof record.text === "string") return record.text;
   if (typeof record.error === "string") return record.error;
   return undefined;
+}
+
+function removeCompetitorContext(query: string) {
+  const lines = query.split("\n");
+  const cleanedLines: string[] = [];
+  let skippingCompetitors = false;
+
+  for (const line of lines) {
+    if (line.startsWith("Competitors:")) {
+      skippingCompetitors = true;
+      continue;
+    }
+
+    if (skippingCompetitors && line.startsWith("Audience sources:")) {
+      skippingCompetitors = false;
+    }
+
+    if (!skippingCompetitors) cleanedLines.push(line);
+  }
+
+  return cleanedLines.join("\n").trim();
+}
+
+function agentContext(agent: AgentId, query: string, sources: string[]) {
+  if (agent === "competitor") {
+    return { query, sources };
+  }
+
+  return {
+    query: removeCompetitorContext(query),
+    sources: []
+  };
 }
 
 async function requireWorkspace(request: NextRequest): Promise<WorkspaceAccess> {
@@ -122,13 +155,23 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
   if (!workspace.ok) return workspace.response;
 
   const body = bodySchema.parse(await request.json());
+  const shouldScrapeCompetitors = body.agents.includes("competitor");
+  const webSources = shouldScrapeCompetitors ? await scrapeCompetitorHomepages(body.query) : [];
+  const sourceSnippets = webSources.map((source) =>
+    [
+      `Title: ${source.title}`,
+      `URL: ${source.url}`,
+      `Text: ${source.text}`
+    ].join("\n")
+  );
   const savedRuns = [];
 
   log("info", "Starting persisted workspace agent run batch", {
     userId: workspace.userId,
     workspaceId: workspace.workspaceId,
     agents: body.agents,
-    appMode: env.APP_MODE
+    appMode: env.APP_MODE,
+    sourceCount: sourceSnippets.length
   });
 
   if (env.APP_MODE === "PRODUCTION") {
@@ -142,11 +185,15 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
     const { enqueueAgentRun } = await import("@/jobs/queues");
 
     for (const agent of body.agents) {
+      const context = agentContext(agent, body.query, sourceSnippets);
       const dbRun = await prisma.agentRun.create({
         data: {
           agent: toDbAgent(agent),
           status: "PENDING",
-          input: { query: body.query },
+          input: {
+            query: context.query,
+            sourceUrls: agent === "competitor" ? webSources.map((source) => source.url) : []
+          },
           workspaceId: workspace.workspaceId
         }
       });
@@ -154,8 +201,9 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
       await enqueueAgentRun({
         agentRunId: dbRun.id,
         agent,
-        query: body.query,
-        workspaceId: workspace.workspaceId
+        query: context.query,
+        workspaceId: workspace.workspaceId,
+        sources: context.sources
       });
 
       savedRuns.push(dbRun);
@@ -165,11 +213,15 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
   }
 
   for (const agent of body.agents) {
+    const context = agentContext(agent, body.query, sourceSnippets);
     const dbRun = await prisma.agentRun.create({
       data: {
         agent: toDbAgent(agent),
         status: "RUNNING",
-        input: { query: body.query },
+        input: {
+          query: context.query,
+          sourceUrls: agent === "competitor" ? webSources.map((source) => source.url) : []
+        },
         workspaceId: workspace.workspaceId
       }
     });
@@ -177,8 +229,9 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
     try {
       const result = await runMarketingAgent({
         agent,
-        query: body.query,
-        workspaceId: workspace.workspaceId
+        query: context.query,
+        workspaceId: workspace.workspaceId,
+        sources: context.sources
       });
 
       const updated = await prisma.agentRun.update({
@@ -187,7 +240,15 @@ export const POST = withApiLogging("/api/workspaces/[id]/agent-runs", async (req
           status: "COMPLETED",
           output: {
             text: result.output,
-            providerRunId: result.runId
+            providerRunId: result.runId,
+            sources:
+              agent === "competitor"
+                ? webSources.map((source) => ({
+                    title: source.title,
+                    url: source.url,
+                    chars: source.text.length
+                  }))
+                : []
           }
         }
       });
